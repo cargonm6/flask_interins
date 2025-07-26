@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Buscador de personas interinas (GVA)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" type="image/png" href="static/favicon.png"/>
+    <link rel="stylesheet" href="static/css/style.css"/>
+    <script src="static/js/app.js">
+    </script>
+</head>
+<body>
+<header>
+    <h1><span class="material-symbols-outlined">database_search</span>&nbsp;Buscador de personas interinas (GVA)</h1>
+</header>
+<main>
+    <div class="container">
+        <h2>Cuerpos de Maestros, Secundaria y Otros Cuerpos</h2>
+        <form method="post">
+            <label for="busqueda">Búsqueda (espere unos instantes para ver sugerencias):</label>
+            <div class="input-loader-wrapper">
+                <input type="text" name="busqueda" id="busqueda" autocomplete="off" required
+                       placeholder="apellidos, nombre, especialidad"/>
+                <span id="loader" class="material-symbols-outlined">autorenew</span>
+            </div>
+            <ul id="sugerencias"></ul>
+            <div class="botones">
+                <button type="submit">Buscar persona</button>
+                <button type="button" class="red" onclick="reset_page()">Recargar</button>
+            </div>
+        </form>
+
+        {% if error %}
+        <p style="color: red;">{{ error }}</p>
+        {% endif %}
+
+        {% if image_path %}
+        <img src="{{ image_path }}" alt="Gráfica generada" onclick="download_img(this)" style="cursor: pointer;"/>
+        {% endif %}
+    </div>
+    <div class="container">
+        <h2>Acerca de...</h2>
+        <p><span class="material-symbols-outlined">bar_chart_4_bars</span>&nbsp;Esta aplicación permite buscar personas
+            que han formado parte de las bolsas de docentes interinos en la
+            Comunidad Valenciana.</p>
+        <p><span class="material-symbols-outlined">contract</span>&nbsp;Los datos actualmente disponibles se
+            corresponden con las listas oficiales de interinos para las
+            adjudicaciones
+            de inicio de curso de años puntuales entre 2004 y 2025. Estas listas calculan la posición de
+            cada persona en función de su fecha de incorporación a bolsa (mediante procesos de concurso-oposición, por
+            procesos de conformación de bolsas extraordinarias o por acceso a través de adjudicaciones de difícil
+            cobertura) y si poseen o no servicios previos.</p>
+        <p><span class="material-symbols-outlined">assured_workload</span>&nbsp;Los datos son de carácter público, y
+            son divulgados por la <a href="https://ceice.gva.es/es/web/educacion" target="_blank">Conselleria d'Educació
+                de la Generalitat Valenciana</a> y retransmitidos por diferentes
+            asociaciones sindicales.</p>
+        <p><span class="material-symbols-outlined">warning</span>&nbsp;El contenido tiene carácter informativo y puede
+            contener errores. Para obtener datos oficiales, consulte las
+            fuentes citadas.</p>
+    </div>
+</main>
+<footer>
+    <p>© 2025 Carlos González Marco • Todos los derechos reservados</p>
+</footer>
+</body>
+</html>
