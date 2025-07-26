@@ -268,10 +268,13 @@ def autocomplete():
     if not query:
         return jsonify([])
 
-    query_norm = remove_accents(query)
+    parts = [p.strip() for p in query.split(",")]
+    while len(parts) < 3:
+        parts.append("")
+    apellido_q, nombre_q, especialidad_q = map(remove_accents, parts)
 
     sql = '''
-        SELECT DISTINCT persona.apellidos || ', ' || persona.nombre || ', ' || grupo.especialidad AS combo
+        SELECT DISTINCT persona.apellidos, persona.nombre, grupo.especialidad
         FROM persona
         JOIN posicion ON persona.id = posicion.persona_id
         JOIN grupo ON grupo.id = posicion.grupo_id
@@ -280,12 +283,21 @@ def autocomplete():
     results = cur.execute(sql).fetchall()
 
     combinados = []
-    for (combo,) in results:
-        combo_norm = remove_accents(combo).lower()
-        if query_norm in combo_norm:
-            combinados.append(combo)
-            if len(combinados) >= 10:
-                break
+    for apellidos, nombre, especialidad in results:
+        apellidos_norm = remove_accents(apellidos).lower()
+        nombre_norm = remove_accents(nombre).lower()
+        especialidad_norm = remove_accents(especialidad).lower()
+
+        if apellido_q and apellido_q not in apellidos_norm:
+            continue
+        if nombre_q and nombre_q not in nombre_norm:
+            continue
+        if especialidad_q and especialidad_q not in especialidad_norm:
+            continue
+
+        combinados.append(f"{apellidos}, {nombre}, {especialidad}")
+        if len(combinados) >= 10:
+            break
 
     return jsonify(combinados)
 
