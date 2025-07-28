@@ -1,16 +1,30 @@
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
 
+:root {
+  --var-plain: #ffffff;
+  --var-light: #e5dada;
+  --var-blue: #005089;
+  --var-red: #840032;
+  --var-gold: #e59500;
+  --var-dark: #02040f;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f0f2f5;
-  color: #333;
+  background: var(--var-light);
+  color: var(--var-dark);
+  margin: 0;
+  padding: 0;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
@@ -19,9 +33,10 @@ body {
   min-height: 100vh;
 }
 
-header, footer {
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+header,
+footer {
+  background: var(--var-plain);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   padding: 1rem 2rem;
   text-align: center;
 }
@@ -29,7 +44,7 @@ header, footer {
 header h1 {
   font-weight: 600;
   font-size: 1.8rem;
-  color: #222;
+  color: var(--var-dark);
 }
 
 main {
@@ -42,18 +57,22 @@ main {
   background: transparent;
 }
 
+a {
+  color: var(--var-blue);
+}
+
 .container {
   display: block;
-  background: #fff;
+  background: var(--var-plain);
   width: 100%;
   max-width: 920px;
   padding: 2rem 2.5rem 3rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   clear: both;
 }
 
-.container + .container {
+.container+.container {
   margin-top: 20px;
 }
 
@@ -62,7 +81,7 @@ form label {
   display: block;
   margin-bottom: 0.5rem;
   font-size: 1rem;
-  color: #555;
+  color: var(--var-dark);
 }
 
 .input-loader-wrapper {
@@ -73,8 +92,9 @@ form label {
 .input-loader-wrapper input[type="text"] {
   width: 100%;
   padding: 12px 14px;
-  padding-right: 40px; /* espacio para el icono giratorio */
-  border: 1.5px solid #ccc;
+  padding-right: 40px;
+  /* espacio para el icono giratorio */
+  border: 1.5px solid var(--var-light);
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
@@ -82,43 +102,71 @@ form label {
 }
 
 .input-loader-wrapper input[type="text"]:focus {
-  border-color: #4a90e2;
+  border-color: var(--var-blue);
   outline: none;
-  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+  box-shadow: 0 0 5px var(--var-dark);
 }
 
 .botones {
   display: flex;
-  gap: 1rem; /* espacio entre los botones */
+  flex-wrap: wrap;
+  /* permite saltar de línea si hace falta */
+  gap: 1rem;
   margin-top: 1.5rem;
+  flex-direction: row;
+  /* por defecto horizontal */
 }
 
 .botones button {
-  flex: 1; /* que ocupen mismo ancho */
+  flex: 1;
+  /* todos igual de anchos */
   padding: 12px;
   font-size: 1.1rem;
   font-weight: 600;
-  color: white;
+  color: var(--var-plain);
+  background-color: var(--var-gold);
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  display: inline-flex;
+  /* icono y texto centrados */
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+}
+
+.botones button:hover {
+  background-color: var(--var-dark);
 }
 
 .botones button[type="submit"] {
-  background-color: #4a90e2;
+  background-color: var(--var-blue);
 }
 
 .botones button[type="submit"]:hover {
-  background-color: #357ABD;
+  background-color: var(--var-dark);
 }
 
 .botones button.red {
-  background-color: #e24a4a;
+  background-color: var(--var-red);
 }
 
 .botones button.red:hover {
-  background-color: #BD3535;
+  background-color: var(--var-dark);
+}
+
+.botones button.disabled {
+  background-color: var(--var-light);
+  color: var(--var-dark);
+  cursor: not-allowed;
+}
+
+.botones button>.material-symbols-outlined {
+  font-size: 1.4em;
+  /* opcional, ajusta tamaño */
+  vertical-align: middle;
+  /* a veces ayuda, pero con flex no hace falta */
 }
 
 #sugerencias {
@@ -130,7 +178,7 @@ form label {
   max-height: 150px;
   overflow-y: auto;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 #sugerencias li {
@@ -153,7 +201,8 @@ form label {
   color: #555;
   pointer-events: none;
   animation: spin 1s linear infinite;
-  display: none; /* oculto por defecto */
+  display: none;
+  /* oculto por defecto */
 }
 
 #loader.active {
@@ -162,8 +211,13 @@ form label {
 
 /* Animación de giro */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 h2 {
@@ -174,13 +228,26 @@ h2 {
   text-align: center;
 }
 
-img[alt="Gráfica generada"] {
-  display: block;
-  max-width: 100%;
-  margin: 1rem auto 0;
-  border-radius: 6px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+#plotly-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  /* mantiene 16:9 */
+  margin-top: 20px;
+  overflow-x: hidden;
+  /* no scroll horizontal */
+  overflow-y: auto;
+  /* scroll vertical si hace falta */
 }
+
+#plotly-graph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 
 p[style*="color: red"] {
   margin-top: 1rem;
@@ -188,7 +255,7 @@ p[style*="color: red"] {
   font-weight: 600;
 }
 
-footer > p {
+footer>p {
   text-align: center;
 }
 
@@ -196,6 +263,16 @@ p {
   text-align: justify;
 }
 
-p + p {
+p+p {
   margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+  .botones {
+    flex-direction: column;
+  }
+
+  .botones button {
+    width: 100%;
+  }
 }

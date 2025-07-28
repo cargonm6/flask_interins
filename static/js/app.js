@@ -1,11 +1,11 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
   const input = document.getElementById("busqueda");
   const lista = document.getElementById("sugerencias");
   const loader = document.getElementById("loader");
 
   let debounceTimeout = null;
 
-  input.addEventListener("input", function () {
+  input.addEventListener("input", function() {
     const query = input.value.trim();
 
     if (debounceTimeout) {
@@ -14,18 +14,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (query.length < 2) {
       lista.innerHTML = "";
-      loader.classList.remove("active");  // cambiar aquí
+      loader.classList.remove("active");
       return;
     }
 
     debounceTimeout = setTimeout(() => {
-      loader.classList.add("active");  // cambiar aquí
+      loader.classList.add("active");
 
       fetch(`/autocomplete?q=${encodeURIComponent(query)}`)
         .then(response => response.json())
         .then(data => {
           lista.innerHTML = "";
-          loader.classList.remove("active");  // y aquí
+          loader.classList.remove("active");
 
           data.forEach(item => {
             const li = document.createElement("li");
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
           });
         })
         .catch(() => {
-          loader.classList.remove("active");  // y aquí también
+          loader.classList.remove("active");
         });
     }, 500);
   });
@@ -49,31 +49,53 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function download_img(elemento) {
-    // Obtener la ruta completa
-    const url = elemento.src;
+  // Obtener la ruta completa
+  const url = elemento.src;
 
-    // Extraer solo el nombre del archivo
-    const nombreArchivo = url.substring(url.lastIndexOf('/') + 1);
+  // Extraer solo el nombre del archivo
+  const nombreArchivo = url.substring(url.lastIndexOf('/') + 1);
 
-    // Crear enlace temporal
-    const enlace = document.createElement('a');
-    enlace.href = url;
-    enlace.download = nombreArchivo;
-    enlace.click();
+  // Crear enlace temporal
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = nombreArchivo;
+  enlace.click();
 }
 
 function reset_page() {
-    // Borrar cookies
+  // Si tu app realmente usa cookies personalizadas
+  if (document.cookie) {
     document.cookie.split(";").forEach(function(c) {
       document.cookie = c
-        .replace(/^ +/, "") // Quitar espacios
-        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date(0).toUTCString() + ";path=/");
     });
+  }
 
-    // Borrar localStorage y sessionStorage (opcional)
-    localStorage.clear();
-    sessionStorage.clear();
+  if (localStorage) localStorage.clear();
+  if (sessionStorage) sessionStorage.clear();
 
-    // Recargar la página
-    location.reload();
+  location.href = "/";
 }
+
+function download_img() {
+  const graphDiv = document.querySelector('#plotly-container div.js-plotly-plot');
+  if (graphDiv) {
+    Plotly.downloadImage(graphDiv, {
+      format: 'png',
+      filename: 'grafica',
+      width: 1000,
+      height: 700,
+      scale: 1
+    });
+  }
+}
+
+window.addEventListener('resize', function() {
+  const plotlyGraph = document.getElementById('plotly-container');
+  if (plotlyGraph) {
+    var aspectRatio = 16 / 9;
+    var newHeight = plotlyGraph.offsetWidth / aspectRatio;
+    plotlyGraph.style.height = newHeight + 'px';
+  }
+});

@@ -2,28 +2,24 @@ import os
 import re
 import sqlite3
 
-import matplotlib
-import unicodedata
-
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import numpy as np
-
-from flask import Flask, render_template, request, jsonify, g
+import plotly.graph_objects as go
+import unicodedata
 from cryptography.fernet import Fernet
+from flask import Flask, render_template, request, jsonify, g
+from plotly.subplots import make_subplots
 
 app = Flask(__name__, instance_relative_config=True)
+app.config['SESSION_COOKIE_NAME'] = None
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'supersecret')
 
 # === Rutas ===
 INSTANCE_DB_PATH = os.path.join(app.instance_path, "database.db")
-IMG_FOLDER = os.path.join("static", "img")
 ENC_DB_PATH = os.path.join("instance", "database.db.enc")
 DEC_DB_PATH = INSTANCE_DB_PATH
 
 # === Crear carpetas necesarias ===
 os.makedirs(app.instance_path, exist_ok=True)
-os.makedirs(IMG_FOLDER, exist_ok=True)
 
 
 # === Función para descifrar la base de datos ===
@@ -40,8 +36,6 @@ def descifrar_db_si_necesario():
 
         with open(DEC_DB_PATH, "wb") as f:
             f.write(decrypted_data)
-
-        print("🔓 Base de datos desencriptada correctamente.")
 
 
 # === Descifrar la base si es necesario ===
@@ -73,141 +67,158 @@ def remove_accents(text):
 
 def buscar_coincidencias(especialidad=None, apellidos=None, nombre=None):
     cur = get_db().cursor()
-    # Traemos todo, sin filtro SQL
+    # Construir consulta base
     query = '''
         SELECT persona.nombre, persona.apellidos, grupo.especialidad
         FROM persona
         JOIN posicion ON persona.id = posicion.persona_id
         JOIN grupo ON grupo.id = posicion.grupo_id
-        GROUP BY persona.nombre, persona.apellidos, grupo.especialidad
+        WHERE 1 = 1
     '''
-    results = cur.execute(query).fetchall()
+    params = []
 
-    # Normalizamos el input
-    nom_norm = remove_accents(nombre or "").lower()
-    ape_norm = remove_accents(apellidos or "").lower()
-    esp_norm = remove_accents(especialidad or "").lower()
+    if nombre:
+        query += ' AND UPPER(persona.nombre) LIKE ?'
+        params.append(f'%{remove_accents(nombre).upper()}%')
+    if apellidos:
+        query += ' AND UPPER(persona.apellidos) LIKE ?'
+        params.append(f'%{remove_accents(apellidos).upper()}%')
+    if especialidad:
+        query += ' AND UPPER(grupo.especialidad) LIKE ?'
+        params.append(f'%{remove_accents(especialidad).upper()}%')
 
-    for n, a, e in results:
-        n_norm = remove_accents(n).lower()
-        a_norm = remove_accents(a).lower()
-        e_norm = remove_accents(e).lower()
-        if ((not nombre or nom_norm in n_norm)
-                and (not apellidos or ape_norm in a_norm)
-                and (not especialidad or esp_norm in e_norm)):
-            return {'NOMBRE': n, 'APELLIDOS': a, 'ESPECIALIDAD': e}
-    return None
+    query += ' GROUP BY persona.nombre, persona.apellidos, grupo.especialidad'
+
+    results = cur.execute(query, params).fetchall()
+
+    # Devolver como lista de dicts
+    return [
+        {'NOMBRE': n, 'APELLIDOS': a, 'ESPECIALIDAD': e}
+        for n, a, e in results
+    ] if results else None
 
 
 def graficar_persona(esp, ape, nom):
     cur = get_db().cursor()
 
+    # Igual que antes...
     query_persona = '''
         SELECT posicion.anyo, posicion.numero, grupo.especialidad, persona.nombre, persona.apellidos
         FROM persona
         JOIN posicion ON persona.id = posicion.persona_id
         JOIN grupo ON grupo.id = posicion.grupo_id
-        WHERE lower(grupo.especialidad) = ?
+        WHERE UPPER(grupo.especialidad) = ?
         ORDER BY posicion.anyo
     '''
-    rows = cur.execute(query_persona, (esp.lower(),)).fetchall()
+    rows = cur.execute(query_persona, (esp.upper(),)).fetchall()
 
-    nom_norm = remove_accents(nom).lower()
-    ape_norm = remove_accents(ape).lower()
-    esp_norm = remove_accents(esp).lower()
+    nom_norm = remove_accents(nom).upper()
+    ape_norm = remove_accents(ape).upper()
+    # esp_norm = remove_accents(esp).upper()
 
-    persona_data = []
-    for anyo, numero, especialidad, nombre, apellidos in rows:
-        if (nom_norm in remove_accents(nombre).lower()
-                and ape_norm in remove_accents(apellidos).lower()
-                and esp_norm in remove_accents(especialidad).lower()):
-            persona_data.append((anyo, numero))
+    persona_data = [(a, n) for a, n, e, nombre, apellidos in rows
+                    if nom_norm in remove_accents(nombre).upper()
+                    and ape_norm in remove_accents(apellidos).upper()]
 
     if not persona_data:
         return None
 
-    # Diccionario año -> número de la persona
-    persona_dict = {anyo: numero for anyo, numero in persona_data}
+    persona_dict = {a: n for a, n in persona_data}
 
     query_total = '''
         SELECT posicion.anyo, COUNT(*)
         FROM posicion
         JOIN grupo ON grupo.id = posicion.grupo_id
-        WHERE lower(grupo.especialidad) = ?
+        WHERE upper(grupo.especialidad) = ?
         GROUP BY posicion.anyo
     '''
-    totales = dict(cur.execute(query_total, (esp.lower(),)).fetchall())
+    totales = dict(cur.execute(query_total, (esp.upper(),)).fetchall())
 
     years = list(range(2004, 2026))
+    numeros = [persona_dict.get(y, None) for y in years]
+    totales_lista = [totales.get(y, 0) for y in years]
 
-    numeros = [persona_dict.get(anyo, np.nan) for anyo in years]
-    totales_lista = [totales.get(anyo, 0) for anyo in years]
+    # Porcentaje inverso
+    pct_inverso = [round((1 - (n / t)) * 100, 1) if n and t else None for n, t in zip(numeros, totales_lista)]
 
-    fig = plt.figure(figsize=(16, 9))
-    grid = plt.GridSpec(2, 1)
+    # Crear figura Plotly con subplots
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+                        subplot_titles=[f"Posición en bolsa",
+                                        f"Tamaño de bolsa y posición anual"])
 
-    # === Gráfico superior ===
-    ax1 = fig.add_subplot(grid[0, 0])
-    ax1.plot(years, numeros, marker='o', linestyle='-')
-    ax1.set_title(f"Evolución de la posición en bolsa ({esp}) de {nom} {ape}")
-    ax1.set_xlabel("Año")
-    ax1.set_ylabel("Posición en bolsa")
-    ax1.set_xticks(years)
-    ax1.invert_yaxis()
-    ax1.grid(True)
-    ax1.set_xlim(2003, 2026)
+    # === Línea de evolución (arriba) ===
+    fig.add_trace(go.Scatter(x=years, y=numeros, mode='lines+markers',
+                             name="Posición",
+                             hoverinfo='x+y',
+                             line=dict(color='#840032')), row=1, col=1)
 
-    min_val = min([x for x in numeros if str(x) != "nan"])
-    max_val = max([x for x in numeros if str(x) != "nan"])
-    rango = max_val - min_val
-    margen = rango * 0.1  # 10% del rango
-    ax1.set_ylim(top=min_val - margen, bottom=max_val + margen)
+    # Anotaciones de % en gráfico superior
+    # Alternar anotaciones arriba y abajo para evitar solapamiento
+    shift_values = [15, -15]  # arriba, abajo
+    shift_index = 0  # índice para alternar
 
-    pct_inverso = []
-    for num, tot in zip(numeros, totales_lista):
-        if np.isnan(num) or tot == 0:
-            pct_inverso.append(0)
-        else:
-            pct_inverso.append(1 - (num / tot))
+    for x, y, pct in zip(years, numeros, pct_inverso):
+        if y is not None and not np.isnan(y):
+            yshift = shift_values[shift_index % 2]
+            fig.add_annotation(x=x, y=y, text=f"{pct:.1f}%", showarrow=False, yshift=yshift, row=1, col=1,
+                               font=dict(size=10, color='#02040f'))
+            shift_index += 1
 
-    for x, y, pct, tot in zip(years, numeros, pct_inverso, totales_lista):
-        if not np.isnan(y):
-            ax1.annotate(f"{pct * 100:.1f}%", (x, y),
-                         textcoords="offset points", xytext=(0, 10), ha='center',
-                         fontsize=9, color='green')
+    # Añadir barras primero
+    fig.add_trace(go.Bar(x=years, y=totales_lista, name="Tamaño bolsa", marker_color='#e5dada'), row=2, col=1)
 
-    # === Gráfico inferior ===
-    ax2 = fig.add_subplot(grid[1, 0])
-    ax2.bar(years, totales_lista, color='lightgray')
+    # max_total = max(totales_lista)
 
-    for x, total, y in zip(years, totales_lista, numeros):
-        # Texto encima de cada barra: total de especialidad
-        if total != 0:
-            ax2.text(x, total + 1, str(total), ha='center', va='bottom',
-                     fontsize=9, color='blue')
-        if not np.isnan(y):
-            # Línea roja indicando la posición de la persona
-            ax2.hlines(y=y, xmin=x - 0.4, xmax=x + 0.4, colors='red', linewidth=2)
-            # Texto encima de la línea roja: posición personal
-            ax2.text(x, y + 1, str(int(y)), ha='center', va='bottom',
-                     fontsize=9, color='red')
+    for x, y_pos in zip(years, numeros):
+        total = totales_lista[x - years[0]]
 
-    ax2.set_title(f"Tamaño de la bolsa ({esp}) y posición de {nom} {ape}")
-    ax2.set_xlabel("Año")
-    ax2.set_ylabel("Número de personas en bolsa")
-    ax2.set_xticks(years)
-    ax2.grid(axis='y')
-    ax2.set_xlim(2003, 2026)
-    ax2.set_ylim(top=int(max(totales_lista) * 1.1))
+        # Línea roja, si hay posición
+        if y_pos is not None:
+            fig.add_trace(go.Scatter(
+                x=[x - 0.3, x + 0.3],
+                y=[y_pos, y_pos],
+                mode='lines',
+                line=dict(color='#840032', width=2),
+                showlegend=False
+            ), row=2, col=1)
 
-    plt.tight_layout()
+            fig.add_annotation(
+                x=x,
+                y=y_pos,
+                yshift=15,
+                text=str(int(y_pos)),
+                showarrow=False,
+                font=dict(size=10, color='#840032'),
+                row=2, col=1
+            )
+        if total > 0:
+            # Texto azul sobre barra
+            fig.add_annotation(
+                x=x,
+                y=total,
+                yshift=15,
+                text=str(total),
+                showarrow=False,
+                font=dict(size=10, color='#005089'),
+                row=2, col=1
+            )
 
-    filename = sanitize_filename(f"{esp}_{ape}_{nom}.png")
-    filepath = os.path.join(IMG_FOLDER, filename)
-    plt.savefig(filepath)
-    plt.close()
+    # Formato general
+    fig.update_yaxes(autorange="reversed", title_text="Posición", row=1, col=1)
+    fig.update_yaxes(title_text="Total", row=2, col=1)
+    fig.update_xaxes(tickmode="array", tickvals=years, tickangle=90, title_text="Años", row=1, col=1,
+                     showticklabels=True)
+    fig.update_xaxes(tickmode="array", tickvals=years, tickangle=90, title_text="Años", row=2, col=1)
+    fig.update_layout(
+        title_text=f"{nom} {ape} - {esp}",
+        title_x=0.5,
+        title_font=dict(size=18),
+        showlegend=False,
+        margin=dict(t=60, b=40),
+        autosize=True,
+    )
 
-    return filename
+    return fig.to_html(full_html=False, include_plotlyjs='cdn', config={"responsive": True})
 
 
 def sanitize_filename(filename):
@@ -237,7 +248,7 @@ def close_db(exception):
 @app.route("/", methods=["GET", "POST"])
 def index():
     error = None
-    image_path = None
+    graph_html = None
 
     if request.method == "POST":
         busqueda = request.form.get("busqueda")
@@ -245,26 +256,32 @@ def index():
             partes = [p.strip() for p in busqueda.split(",")]
             if len(partes) == 3:
                 ape, nom, esp = partes
-                persona = buscar_coincidencias(especialidad=esp, apellidos=ape, nombre=nom)
-                if persona:
-                    filename = graficar_persona(persona['ESPECIALIDAD'], persona['APELLIDOS'], persona['NOMBRE'])
-                    if filename:
-                        image_path = f"/{IMG_FOLDER}/{filename}"
+                coincidencias = buscar_coincidencias(especialidad=esp, apellidos=ape, nombre=nom)
+                if coincidencias:
+                    persona = coincidencias[0]
+                    graph_html = graficar_persona(
+                        persona['ESPECIALIDAD'],
+                        persona['APELLIDOS'],
+                        persona['NOMBRE']
+                    )
+                    if graph_html:
+                        return render_template("index.html", graph_html=graph_html, error=None)
                     else:
                         error = "No se pudo generar la gráfica."
                 else:
                     error = "No se encontraron coincidencias."
             else:
-                error = "Formato de búsqueda incorrecto. Usa: Apellido, Nombre, Especialidad"
+                error = "Formato de búsqueda incorrecto. Usa: Apellidos, Nombre, Especialidad"
         else:
             error = "Debes introducir un valor."
+        return render_template("index.html", graph_html=None, error=error)
 
-    return render_template("index.html", image_path=image_path, error=error)
+    return render_template("index.html", graph_html=graph_html, error=None)
 
 
 @app.route("/autocomplete")
 def autocomplete():
-    query = request.args.get("q", "").strip().lower()
+    query = request.args.get("q", "").strip()
     if not query:
         return jsonify([])
 
@@ -273,31 +290,31 @@ def autocomplete():
         parts.append("")
     apellido_q, nombre_q, especialidad_q = map(remove_accents, parts)
 
+    # Convertir a mayúsculas para que el filtro sea case-insensitive
+    apellido_q = apellido_q.upper()
+    nombre_q = nombre_q.upper()
+    especialidad_q = especialidad_q.upper()
+
     sql = '''
         SELECT DISTINCT persona.apellidos, persona.nombre, grupo.especialidad
         FROM persona
         JOIN posicion ON persona.id = posicion.persona_id
         JOIN grupo ON grupo.id = posicion.grupo_id
+        WHERE UPPER(persona.apellidos) LIKE ?
+          AND UPPER(persona.nombre) LIKE ?
+          AND UPPER(grupo.especialidad) LIKE ?
+        LIMIT 10
     '''
+    params = (
+        f'%{apellido_q}%' if apellido_q else '%',
+        f'%{nombre_q}%' if nombre_q else '%',
+        f'%{especialidad_q}%' if especialidad_q else '%'
+    )
+
     cur = get_db().cursor()
-    results = cur.execute(sql).fetchall()
+    results = cur.execute(sql, params).fetchall()
 
-    combinados = []
-    for apellidos, nombre, especialidad in results:
-        apellidos_norm = remove_accents(apellidos).lower()
-        nombre_norm = remove_accents(nombre).lower()
-        especialidad_norm = remove_accents(especialidad).lower()
-
-        if apellido_q and apellido_q not in apellidos_norm:
-            continue
-        if nombre_q and nombre_q not in nombre_norm:
-            continue
-        if especialidad_q and especialidad_q not in especialidad_norm:
-            continue
-
-        combinados.append(f"{apellidos}, {nombre}, {especialidad}")
-        if len(combinados) >= 10:
-            break
+    combinados = [f"{apellidos}, {nombre}, {especialidad}" for apellidos, nombre, especialidad in results]
 
     return jsonify(combinados)
 
