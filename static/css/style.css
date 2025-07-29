@@ -267,6 +267,11 @@ p+p {
   margin-top: 10px;
 }
 
+.error-message {
+    color: red;
+    font-weight: bold;
+}
+
 @media (max-width: 600px) {
   .botones {
     flex-direction: column;

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="100mm"
+   height="100mm"
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="favicon.svg"
+   inkscape:export-filename="C:\Users\Carlos\PycharmProjects\flask_interins\static\icons\ms-icon-144x144.png"
+   inkscape:export-xdpi="36.576"
+   inkscape:export-ydpi="36.576"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:snap-intersection-paths="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="45.961941"
+     inkscape:cy="207.18229"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <clipPath
+       id="id0">
+      <rect
+         id="rect4371"
+         height="4.3569002"
+         width="20.0905"
+         y="67.224602"
+         x="92.623299" />
+    </clipPath>
+    <clipPath
+       id="id1">
+      <rect
+         id="rect4374"
+         height="23.9634"
+         width="20.5746"
+         y="28.4958"
+         x="95.285896" />
+    </clipPath>
+    <clipPath
+       id="id2">
+      <rect
+         id="rect4377"
+         height="27.3522"
+         width="14.7653"
+         y="20.507999"
+         x="111.019" />
+    </clipPath>
+  </defs>
+  <g
+     inkscape:label="Capa 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(64.254784,127.43867)">
+    <rect
+       style="opacity:1;fill:#e59500;fill-opacity:1;stroke-width:0.5;stroke-dasharray:0.5, 0.5;paint-order:stroke markers fill;stop-color:#000000"
+       id="rect2447"
+       width="100"
+       height="100"
+       x="-64.254784"
+       y="-127.43867" />
+    <g
+       id="g4474"
+       style="fill:#840032;fill-opacity:1">
+      <rect
+         style="fill:#840032;fill-opacity:1;stroke-width:0.5;stroke-dasharray:0.5, 0.5;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect2447-1-9"
+         width="100"
+         height="11.111111"
+         x="-64.254784"
+         y="-116.32756" />
+      <rect
+         style="fill:#840032;fill-opacity:1;stroke-width:0.5;stroke-dasharray:0.5, 0.5;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect2447-1-6"
+         width="100"
+         height="11.111111"
+         x="-64.254784"
+         y="-94.105347" />
+      <rect
+         style="fill:#840032;fill-opacity:1;stroke-width:0.5;stroke-dasharray:0.5, 0.5;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect2447-1-4-6"
+         width="100"
+         height="11.111111"
+         x="-64.254784"
+         y="-71.883133" />
+      <rect
+         style="fill:#840032;fill-opacity:1;stroke-width:0.5;stroke-dasharray:0.5, 0.5;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect2447-1-9-0"
+         width="100"
+         height="11.111111"
+         x="-64.254784"
+         y="-49.660908" />
+    </g>
+    <rect
+       style="fill:#005089;fill-opacity:1;stroke-width:0.5;stroke-dasharray:0.5, 0.5;paint-order:stroke markers fill;stop-color:#000000"
+       id="rect2447-1-9-5"
+       width="100"
+       height="50"
+       x="-127.43867"
+       y="14.254781"
+       transform="rotate(90)" />
+    <g
+       id="g9376"
+       transform="translate(81.735215,-6.9073024)">
+      <path
+         id="rect2857-0"
+         style="fill:#ffffff;stroke-width:0.499999;stroke-dasharray:0.499999, 0.499999;paint-order:stroke markers fill;stop-color:#000000"
+         d="m -95.989949,-98.531735 -40.000051,20.000028 19.9992,10.000428 h 8e-4 l 19.999201,10.000429 8e-4,3.199804 8e-4,-3.199804 L -75.99,-68.531279 h 8e-4 l 11.999686,-6.000257 4.00017,-2.000086 3.999345,-2.000085 z m 0,43.200689 -20.000021,-9.999599 v 12.799222 l 20.000021,10.000429 20.000032,-10.000429 v -12.799222 z m 36.000716,-17.999942 -4.00017,2.000086 v 12.799222 h 4.00017 z" />
+    </g>
+  </g>
+</svg>

@@ -67,35 +67,68 @@ def remove_accents(text):
 
 def buscar_coincidencias(especialidad=None, apellidos=None, nombre=None):
     cur = get_db().cursor()
-    # Construir consulta base
-    query = '''
+    params = []
+
+    # Verificar si los campos son exactamente iguales
+    query_exact = '''
         SELECT persona.nombre, persona.apellidos, grupo.especialidad
         FROM persona
         JOIN posicion ON persona.id = posicion.persona_id
         JOIN grupo ON grupo.id = posicion.grupo_id
         WHERE 1 = 1
     '''
-    params = []
 
     if nombre:
-        query += ' AND UPPER(persona.nombre) LIKE ?'
-        params.append(f'%{remove_accents(nombre).upper()}%')
+        query_exact += ' AND UPPER(persona.nombre) = ?'  # Exact match
+        params.append(remove_accents(nombre).upper())
     if apellidos:
-        query += ' AND UPPER(persona.apellidos) LIKE ?'
-        params.append(f'%{remove_accents(apellidos).upper()}%')
+        query_exact += ' AND UPPER(persona.apellidos) = ?'  # Exact match
+        params.append(remove_accents(apellidos).upper())
     if especialidad:
-        query += ' AND UPPER(grupo.especialidad) LIKE ?'
-        params.append(f'%{remove_accents(especialidad).upper()}%')
+        query_exact += ' AND UPPER(grupo.especialidad) = ?'  # Exact match
+        params.append(remove_accents(especialidad).upper())
 
-    query += ' GROUP BY persona.nombre, persona.apellidos, grupo.especialidad'
+    query_exact += ' GROUP BY persona.nombre, persona.apellidos, grupo.especialidad'
 
-    results = cur.execute(query, params).fetchall()
+    # Primero intentamos la búsqueda exacta
+    results_exact = cur.execute(query_exact, params).fetchall()
+
+    if results_exact:
+        # Si se encuentra un resultado exacto, devolverlo
+        return [
+            {'NOMBRE': n, 'APELLIDOS': a, 'ESPECIALIDAD': e}
+            for n, a, e in results_exact
+        ]
+
+    # Si no se encuentra, realizamos la búsqueda por aproximación con LIKE
+    query_approx = '''
+        SELECT persona.nombre, persona.apellidos, grupo.especialidad
+        FROM persona
+        JOIN posicion ON persona.id = posicion.persona_id
+        JOIN grupo ON grupo.id = posicion.grupo_id
+        WHERE 1 = 1
+    '''
+    params_approx = []
+
+    if nombre:
+        query_approx += ' AND UPPER(persona.nombre) LIKE ?'  # Búsqueda aproximada
+        params_approx.append(f'%{remove_accents(nombre).upper()}%')
+    if apellidos:
+        query_approx += ' AND UPPER(persona.apellidos) LIKE ?'  # Búsqueda aproximada
+        params_approx.append(f'%{remove_accents(apellidos).upper()}%')
+    if especialidad:
+        query_approx += ' AND UPPER(grupo.especialidad) LIKE ?'  # Búsqueda aproximada
+        params_approx.append(f'%{remove_accents(especialidad).upper()}%')
+
+    query_approx += ' GROUP BY persona.nombre, persona.apellidos, grupo.especialidad'
+
+    results_approx = cur.execute(query_approx, params_approx).fetchall()
 
     # Devolver como lista de dicts
     return [
         {'NOMBRE': n, 'APELLIDOS': a, 'ESPECIALIDAD': e}
-        for n, a, e in results
-    ] if results else None
+        for n, a, e in results_approx
+    ] if results_approx else None
 
 
 def graficar_persona(esp, ape, nom):
