@@ -179,11 +179,41 @@ def graficar_persona(esp, ape, nom):
                         subplot_titles=[f"Posición en bolsa",
                                         f"Tamaño de bolsa y posición anual"])
 
+    #
+
+    #
+
     # === Línea de evolución (arriba) ===
-    fig.add_trace(go.Scatter(x=years, y=numeros, mode='lines+markers',
-                             name="Posición",
-                             hoverinfo='x+y',
-                             line=dict(color='#840032')), row=1, col=1)
+    # 1️⃣ Lista de puntos válidos (año, valor)
+    points = [(x, y) for x, y in zip(years, numeros) if y is not None]
+
+    # 2️⃣ Ordena por año, por si acaso
+    points.sort()
+
+    # 3️⃣ Recorre pares consecutivos de puntos válidos
+    for i in range(len(points) - 1):
+        x0, y0 = points[i]
+        x1, y1 = points[i + 1]
+
+        dash_style = 'solid' if x1 == x0 + 1 else 'dot'
+
+        fig.add_trace(go.Scatter(
+            x=[x0, x1],
+            y=[y0, y1],
+            mode='lines',
+            line=dict(color='#840032' if x1 == x0 + 1 else '#005089', dash=dash_style, width=2),
+            showlegend=False
+        ), row=1, col=1)
+
+    # Puntos (markers)
+    fig.add_trace(go.Scatter(
+        x=[x for x, y in points],
+        y=[y for x, y in points],
+        mode='markers',
+        marker=dict(color='#840032', size=6),
+        name="Posición",
+        showlegend=False
+    ), row=1, col=1)
 
     # Anotaciones de % en gráfico superior
     # Alternar anotaciones arriba y abajo para evitar solapamiento

@@ -41,41 +41,66 @@
     <h1><span class="material-symbols-outlined">database_search</span>&nbsp;Buscador de personas interinas (GVA)</h1>
 </header>
 <main>
-    <div class="container">
-        <h2>Cuerpos de Maestros, Secundaria y Otros Cuerpos</h2>
-        <form method="post">
-            <label for="busqueda">Búsqueda (espere unos instantes para ver sugerencias):</label>
-            <div class="input-loader-wrapper">
-                <input type="text" name="busqueda" id="busqueda" autocomplete="off" required
-                       placeholder="Ejemplo: 'Pérez, Juan, Matemáticas'" aria-describedby="busqueda-ayuda"/>
-                <span id="loader" class="material-symbols-outlined">autorenew</span>
-            </div>
-            <ul id="sugerencias"></ul>
-            <div class="botones">
-                <button type="submit" aria-label="Buscar">
-                    <span class="material-symbols-outlined">search</span>Buscar
-                </button>
-                <button type="button" class="red" onclick="reset_page()" aria-label="Recargar la página">
-                    <span class="material-symbols-outlined">recycling</span>Recargar
-                </button>
-                <button type="button" {% if not graph_html %} class="disabled" {% endif %} onclick="download_img()" {% if not graph_html %} disabled {% endif %} aria-label="Descargar la imagen">
-                    <span class="material-symbols-outlined">download</span>Descargar
-                </button>
-            </div>
-        </form>
+  <div class="container">
+    <h2>Buscador de personas interinas (GVA)</h2>
 
-        {% if error %}
-            <p class="error-message">{{ error }}</p>
-        {% endif %}
-
-        {% if graph_html %}
-        <div id="plotly-container">
-            <div id="plotly-graph">
-                {{ graph_html|safe }}
-            </div>
-        </div>
-        {% endif %}
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tablinks active" onclick="openTab(event, 'secundaria')">Secundaria y otros cuerpos</button>
+      <button class="tablinks" onclick="openTab(event, 'maestros')">Maestros</button>
     </div>
+
+    <!-- Contenido Tab Secundaria -->
+    <div id="secundaria" class="tabcontent" style="display: block;">
+      <h3>Cuerpo de Secundaria y Otros Cuerpos</h3>
+      <form method="post" onsubmit="searching()">
+        <label for="busqueda">Búsqueda (espere unos instantes para ver sugerencias):</label>
+        <div class="input-loader-wrapper">
+          <input type="text" name="busqueda" id="busqueda" autocomplete="off" required
+                 placeholder="Ejemplo: 'Pérez, Juan, Matemáticas'" aria-describedby="busqueda-ayuda"/>
+          <span id="loader" class="material-symbols-outlined">autorenew</span>
+        </div>
+        <ul id="sugerencias"></ul>
+        <div class="botones">
+          <button type="submit" aria-label="Buscar">
+            <span class="material-symbols-outlined">search</span>Buscar
+          </button>
+          <button type="button" class="red" onclick="reset_page()" aria-label="Recargar la página">
+            <span class="material-symbols-outlined">recycling</span>Recargar
+          </button>
+          <button type="button" {% if not graph_html %} class="disabled" {% endif %} onclick="download_img()" {% if not graph_html %} disabled {% endif %} aria-label="Descargar la imagen">
+            <span class="material-symbols-outlined">download</span>Descargar
+          </button>
+        </div>
+      </form>
+
+      <div class="search-wrapper">
+        <span id="searching" class="material-symbols-outlined">data_loss_prevention</span>
+      </div>
+
+      {% if error %}
+          <p class="error-message">{{ error }}</p>
+      {% endif %}
+
+      {% if graph_html %}
+      <div id="plotly-container">
+          <div id="plotly-graph">
+              {{ graph_html|safe }}
+          </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Contenido Tab Maestros -->
+    <div id="maestros" class="tabcontent" style="display: none;">
+      <h3>Cuerpo de Maestros</h3>
+        <p>Contenido en construcción...</p>
+        <div class="construction-wrapper">
+        <span id="under-construction" class="material-symbols-outlined">construction</span>
+      </div>
+    </div>
+  </div>
+
     <div class="container">
         <h2>Acerca de...</h2>
         <p><span class="material-symbols-outlined">bar_chart_4_bars</span>&nbsp;Esta aplicación permite buscar personas
@@ -92,6 +117,7 @@
                 de la Generalitat Valenciana</a> y retransmitidos por las diferentes agrupaciones sindicales.</p>
         <p><span class="material-symbols-outlined">warning</span>&nbsp;El contenido tiene carácter informativo y puede
             contener errores. Para obtener datos oficiales, consulte las fuentes citadas.</p>
+        <p><span class="material-symbols-outlined">calendar_clock</span>&nbsp;Última actualización: 30/07/2025.</p>
     </div>
 </main>
 <footer>

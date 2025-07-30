@@ -209,6 +209,50 @@ form label {
   display: inline-block;
 }
 
+.search-wrapper {
+  position: relative; /* <- Esto hace que el span se posicione dentro de este div */
+  display: inline-block; /* Para que se ajuste al contenido */
+  text-align: center;
+  height: 48px;
+  width: 100%;
+}
+
+.construction-wrapper {
+  position: relative; /* <- Esto hace que el span se posicione dentro de este div */
+  display: inline-block; /* Para que se ajuste al contenido */
+  text-align: center;
+  height: 64px;
+  width: 100%;
+}
+
+#searching, #under-construction {
+  position: absolute;
+  right: calc(100%/2 - 40px);
+  top: 20%;
+  font-size: 64px;
+  color: var(--var-blue);
+  pointer-events: none;
+  animation: sweep 2s ease-in-out infinite alternate;
+  transform-origin: 50% 100%; /* pivote en la parte inferior del icono */
+}
+
+#searching {
+    display: none;
+}
+
+#searching.active, #under-construction {
+  display: inline-block;
+}
+
+@keyframes sweep {
+  0% {
+    transform: rotate(-20deg);
+  }
+  100% {
+    transform: rotate(20deg);
+  }
+}
+
 /* Animación de giro */
 @keyframes spin {
   from {
@@ -272,6 +316,57 @@ p+p {
     font-weight: bold;
 }
 
+/* Contenedor de las tabs */
+.tabs {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+/* Botones de las tabs */
+.tablinks {
+  background: var(--var-plain);
+  border: 1px solid transparent;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--var-dark);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  border-color: var(--var-blue)
+  z-index: 0;
+}
+
+.tablinks:hover {
+    color: var(--var-red);
+    border-color: var(--var-red) var(--var-red) transparent var(--var-red);
+}
+
+/* Tab activa */
+.tablinks.active {
+  background: var(--var-plain);
+  border-color: var(--var-blue) var(--var-blue) transparent var(--var-blue);
+  color: var(--var-blue);
+  box-shadow: none;
+  cursor: default;
+  font-weight: 700;
+  z-index: 100;
+}
+
+/* Contenido de la tab */
+.tabcontent {
+  background: var(--var-plain);
+  border: 1px solid var(--var-blue);
+  border-radius: 0 8px 8px 8px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  z-index: 200;
+  margin-top: -1px;
+}
+
+
 @media (max-width: 600px) {
   .botones {
     flex-direction: column;
@@ -280,4 +375,25 @@ p+p {
   .botones button {
     width: 100%;
   }
+
+  .tabs {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .tablinks {
+    flex: 1 1 45%;
+    text-align: center;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+
+  .tablinks.active {
+  border-color: var(--var-blue);
+}
+
+.tabcontent {
+margin-top:0.3rem;
+border-radius: 8px;
+}
 }

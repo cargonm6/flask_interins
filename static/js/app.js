@@ -99,3 +99,22 @@ window.addEventListener('resize', function() {
     plotlyGraph.style.height = newHeight + 'px';
   }
 });
+
+function openTab(evt, tabName) {
+  // Ocultar todos los tabcontent
+  const tabcontents = document.querySelectorAll('.tabcontent');
+  tabcontents.forEach(tc => tc.style.display = 'none');
+
+  // Quitar clase active de todos los botones
+  const tablinks = document.querySelectorAll('.tablinks');
+  tablinks.forEach(tl => tl.classList.remove('active'));
+
+  // Mostrar la pestaña seleccionada y marcar botón activo
+  document.getElementById(tabName).style.display = 'block';
+  evt.currentTarget.classList.add('active');
+}
+
+function searching() {
+    document.getElementById('searching').classList.add('active');
+    document.getElementsByClassName('error-message')[0].style.display = "none";
+}
